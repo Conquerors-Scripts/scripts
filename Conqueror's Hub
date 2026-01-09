@@ -1,0 +1,711 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://pastebin.com/raw/QfvbQndZ"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Conqueror's Hub V2 " .. Fluent.Version,
+    SubTitle = "by Conqueror",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.K -- Used when theres no MinimizeKeybind
+})
+
+--Fluent provides Lucide Icons https://lucide.dev/icons/ for the tabs, icons are optional
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "rocket" }),
+    Fun = Window:AddTab({ Title = "Fun", Icon = "party-popper" }),
+    Hubs = Window:AddTab({ Title = "Hubs", Icon = "table-2" }),
+    Misc = Window:AddTab({ Title = "Misc", Icon = "plus" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
+}
+
+local Options = Fluent.Options
+
+Tabs.Main:AddButton({
+    Title = "FE Sandevistan",
+    Description = "R for sandevistan pc only",
+    Callback = function()
+        Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://pastebin.com/raw/tPh4jS4p"))()
+                    end
+                },
+                {
+                    Title = "Cancel"
+                }
+            }
+        })
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "FE Animation Energize",
+    Description = "The better emote hub, custom made",
+    Callback = function()
+        Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://rawscripts.net/raw/Energize-script-24783"))()
+                    end
+                },
+                {
+                    Title = "Cancel"
+                }
+            }
+        })
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "Ink Monster FE",
+    Description = "Fling Monster",
+    Callback = function()
+        Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe/main/obf_rTvXTs8F16D8D2oiLxZ62E1E9jT1we312yUyJr2h72Vwqr32l37rirU1S89hqRV7.lua.txt"))()
+                    end
+                },
+                {
+                    Title = "Cancel"
+                }
+            }
+        })
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "Death Note Fling FE",
+    Description = "It kills people with a fling.",
+    Callback = function()
+        Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://pastebin.com/raw/5Baep7Ub"))()
+                    end
+                },
+                {
+                    Title = "Cancel"
+                }
+            }
+        })
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "Invisible Script FE",
+    Description = "you know what it does, also very cool",
+    Callback = function()
+        Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://pastebin.com/raw/3Rnd9rHf"))()
+                    end
+                },
+                {
+                    Title = "Cancel"
+                }
+            }
+        })
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "Fly Gui",
+    Description = "you know what it does",
+    Callback = function()
+        Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-simple-fly-gui-77244"))()
+                    end
+                },
+                {
+                    Title = "Cancel"
+                }
+            }
+        })
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "One Piece Powers",
+    Description = "Not FE",
+    Callback = function()
+        Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://pastebin.com/raw/5dWPdjQV"))()
+                    end
+                },
+                {
+                    Title = "Cancel"
+                }
+            }
+        })
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "Emote Hub FE",
+    Description = "Universal, very op",
+    Callback = function()
+        Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Emote-Animation-Script-UGC-78410"))()
+                    end
+                },
+                {
+                    Title = "Cancel"
+                }
+            }
+        })
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "Backflip FE Script",
+    Description = "Z and X for flip C for Jump pc only",
+    Callback = function()
+        Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-backflip-script-67332"))()
+                    end
+                },
+                {
+                    Title = "Cancel"
+                }
+            }
+        })
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "Spiderman FE",
+    Description = "Q&E for hooks, LCtrl for boost pc only",
+    Callback = function()
+        Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Omni-directional-Mobility-ODM-gear-movement-thingy-77053"))()
+                    end
+                },
+                {
+                    Title = "Cancel"
+                }
+            }
+        })
+    end
+})
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+local InfiniteJumpEnabled = false
+
+-- Infinite jump handler (connect ONCE)
+UserInputService.JumpRequest:Connect(function()
+    if not InfiniteJumpEnabled then return end
+
+    local character = LocalPlayer.Character
+    if not character then return end
+
+    local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+    if humanoid then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- Toggle (ID MUST MATCH)
+local Toggle = Tabs.Fun:AddToggle("InfiniteJump", {
+    Title = "Infinite Jump",
+    Default = false
+})
+
+Toggle:OnChanged(function(value)
+    InfiniteJumpEnabled = value
+end)
+
+Options.InfiniteJump:SetValue(false)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local ESPEnabled = false
+local ESPBoxes = {}
+
+-- Create invisible part for ESP
+local function createESPPart(player)
+    local part = Instance.new("Part")
+    part.Size = Vector3.new(1,1,1)
+    part.Anchored = true
+    part.Transparency = 1
+    part.CanCollide = false
+    part.Name = player.Name .. "_ESPPart"
+    part.Parent = workspace
+    return part
+end
+
+-- Create BillboardGui to show player name
+local function createNameTag(player)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = player.Name .. "_NameTag"
+    billboard.Adornee = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    billboard.Size = UDim2.new(0, 100, 0, 30)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = player.Name
+    textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.Parent = billboard
+
+    billboard.Parent = workspace
+    return billboard
+end
+
+-- Function to create ESP for a player
+local function createESP(player)
+    if player == LocalPlayer then return end
+    if ESPBoxes[player] then return end
+
+    local character = player.Character
+    if not character then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    -- Invisible part for box
+    local part = createESPPart(player)
+
+    -- BoxHandleAdornment
+    local box = Instance.new("BoxHandleAdornment")
+    box.Adornee = part
+    box.AlwaysOnTop = true
+    box.Size = Vector3.new(2, 5, 1)
+    box.ZIndex = 10
+    box.Color3 = Color3.fromRGB(0, 255, 0)
+    box.Transparency = 0.5  -- Slightly transparent
+    box.Parent = part
+
+    -- Billboard name tag
+    local nameTag = createNameTag(player)
+
+    ESPBoxes[player] = {Box = box, Part = part, NameTag = nameTag}
+end
+
+-- Remove ESP
+local function removeESP(player)
+    if ESPBoxes[player] then
+        if ESPBoxes[player].Box then ESPBoxes[player].Box:Destroy() end
+        if ESPBoxes[player].Part then ESPBoxes[player].Part:Destroy() end
+        if ESPBoxes[player].NameTag then ESPBoxes[player].NameTag:Destroy() end
+        ESPBoxes[player] = nil
+    end
+end
+
+-- Update ESP each frame
+RunService.RenderStepped:Connect(function()
+    if ESPEnabled then
+        for player, data in pairs(ESPBoxes) do
+            local character = player.Character
+            local hrp = character and character:FindFirstChild("HumanoidRootPart")
+            if hrp and data.Part then
+                data.Part.CFrame = hrp.CFrame
+                if data.NameTag then
+                    data.NameTag.Adornee = hrp
+                end
+            else
+                removeESP(player)
+            end
+        end
+    end
+end)
+
+-- Fluent UI toggle in Tabs.Fun
+local Toggle = Tabs.Fun:AddToggle("PlayerESP", {
+    Title = "Player ESP",
+    Default = false
+})
+
+Toggle:OnChanged(function(value)
+    ESPEnabled = value
+    if ESPEnabled then
+        for _, player in ipairs(Players:GetPlayers()) do
+            createESP(player)
+        end
+    else
+        for player, _ in pairs(ESPBoxes) do
+            removeESP(player)
+        end
+    end
+end)
+
+Options.PlayerESP:SetValue(false)
+
+-- Handle new players
+Players.PlayerAdded:Connect(function(player)
+    if ESPEnabled and player ~= LocalPlayer then
+        player.CharacterAdded:Connect(function()
+            createESP(player)
+        end)
+    end
+end)
+
+-- Handle players leaving
+Players.PlayerRemoving:Connect(function(player)
+    removeESP(player)
+end)
+
+
+-- WalkSpeed Slider
+local WalkspeedSlider = Tabs.Fun:AddSlider("WalkSpeed", {
+    Title = "Walkspeed",
+    Description = "Adjust your WalkSpeed",
+    Default = 16,
+    Min = 16,
+    Max = 250,
+    Rounding = 1,
+    Callback = function(v)
+        local character = LocalPlayer.Character
+        if character and character:FindFirstChildOfClass("Humanoid") then
+            character.Humanoid.WalkSpeed = v
+        end
+    end
+})
+
+WalkspeedSlider:OnChanged(function(v)
+    local character = LocalPlayer.Character
+    if character and character:FindFirstChildOfClass("Humanoid") then
+        character.Humanoid.WalkSpeed = v
+    end
+end)
+
+WalkspeedSlider:SetValue(16)
+
+
+-- JumpPower Slider
+local JumpPowerSlider = Tabs.Fun:AddSlider("JumpPower", {
+    Title = "JumpPower",
+    Description = "Adjust your JumpPower",
+    Default = 50,
+    Min = 50,
+    Max = 500,
+    Rounding = 1,
+    Callback = function(v)
+        local character = LocalPlayer.Character
+        if character and character:FindFirstChildOfClass("Humanoid") then
+            character.Humanoid.JumpPower = v
+        end
+    end
+})
+
+JumpPowerSlider:OnChanged(function(v)
+    local character = LocalPlayer.Character
+    if character and character:FindFirstChildOfClass("Humanoid") then
+        character.Humanoid.JumpPower = v
+    end
+end)
+
+JumpPowerSlider:SetValue(50)
+
+
+-- FOV Slider
+local FOVSlider = Tabs.Fun:AddSlider("FOV", {
+    Title = "FOV",
+    Description = "Adjust camera Field of View",
+    Default = Camera.FieldOfView,
+    Min = 10,
+    Max = 120,
+    Rounding = 1,
+    Callback = function(v)
+        Camera.FieldOfView = v
+    end
+})
+
+FOVSlider:OnChanged(function(v)
+    Camera.FieldOfView = v
+end)
+
+FOVSlider:SetValue(Camera.FieldOfView)
+
+
+-- Gravity Slider
+local GravitySlider = Tabs.Fun:AddSlider("Gravity", {
+    Title = "Gravity",
+    Description = "Adjust world gravity",
+    Default = workspace.Gravity,
+    Min = 0,
+    Max = 500,
+    Rounding = 1,
+    Callback = function(v)
+        workspace.Gravity = v
+    end
+})
+
+GravitySlider:OnChanged(function(v)
+    workspace.Gravity = v
+end)
+
+GravitySlider:SetValue(workspace.Gravity)
+
+-- System Broken Hub
+Tabs.Hubs:AddButton({
+    Title = "System Broken Hub",
+    Description = "Universal Script",
+    Callback = function()
+        local Dialog
+        Dialog = Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-System-Broken-New-Update-Script-Universal-71662"))()
+                        Dialog:Close()
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        Dialog:Close()
+                    end
+                }
+            }
+        })
+    end
+})
+
+-- Echolite Hub
+Tabs.Hubs:AddButton({
+    Title = "Echolite Hub",
+    Description = "Universal Script",
+    Callback = function()
+        local Dialog
+        Dialog = Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://raw.githubusercontent.com/YepimSirPwnsAlot/dfdsfsfewfe/refs/heads/main/xcscdscsdcs"))()
+                        Dialog:Close()
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        Dialog:Close()
+                    end
+                }
+            }
+        })
+    end
+})
+
+-- OP Admin Script
+Tabs.Misc:AddButton({
+    Title = "OP Admin Script",
+    Description = "Admin Script",
+    Callback = function()
+        local Dialog
+        Dialog = Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet('https://raw.githubusercontent.com/addihallstar/opadminsupreme/refs/heads/main/opadmin_new.lua'))()
+                        Dialog:Close()
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        Dialog:Close()
+                    end
+                }
+            }
+        })
+    end
+})
+
+-- Nameless Admin
+Tabs.Misc:AddButton({
+    Title = "Nameless Admin",
+    Description = "Admin Script",
+    Callback = function()
+        local Dialog
+        Dialog = Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Nameless-admin-reworked-75477"))()
+                        Dialog:Close()
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        Dialog:Close()
+                    end
+                }
+            }
+        })
+    end
+})
+
+-- Infinite Yield
+Tabs.Misc:AddButton({
+    Title = "Infinite Yield",
+    Description = "Admin Script",
+    Callback = function()
+        local Dialog
+        Dialog = Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-modded-80479"))()
+                        Dialog:Close()
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        Dialog:Close()
+                    end
+                }
+            }
+        })
+    end
+})
+
+-- Remote Spy
+Tabs.Misc:AddButton({
+    Title = "Remote Spy",
+    Description = "Admin Script",
+    Callback = function()
+        local Dialog
+        Dialog = Window:Dialog({
+            Title = "Execute Script?",
+            Content = "Are you sure you want to run this script?",
+            Buttons = {
+                {
+                    Title = "Execute Script?",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Simple-RemoteSpy-WORKS-IN-ALL-EXECUTORS-79223"))()
+                        Dialog:Close()
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        Dialog:Close()
+                    end
+                }
+            }
+        })
+    end
+})
+
+
+
+
+-- Addons:
+-- SaveManager (Allows you to have a configuration system)
+-- InterfaceManager (Allows you to have a interface managment system)
+
+-- Hand the library over to our managers
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+
+-- Ignore keys that are used by ThemeManager.
+-- (we dont want configs to save themes, do we?)
+SaveManager:IgnoreThemeSettings()
+
+-- You can add indexes of elements the save manager should ignore
+SaveManager:SetIgnoreIndexes({})
+
+-- use case for doing it this way:
+-- a script hub could have themes in a global folder
+-- and game configs in a separate folder per game
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+
+
+Fluent:Notify({
+    Title = "Fluent",
+    Content = "The script has been loaded.",
+    Duration = 8
+})
+
+-- You can use the SaveManager:LoadAutoloadConfig() to load a config
+-- which has been marked to be one that auto loads!
+SaveManager:LoadAutoloadConfig()
