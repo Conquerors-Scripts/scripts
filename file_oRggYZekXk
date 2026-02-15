@@ -1,0 +1,883 @@
+--[[
+    ULTIMATE COMBO SCRIPT
+    All features in one - R15 & R6 Compatible
+    
+    Controls:
+    [F] - Toggle Time Stop
+    [E] - Toggle ESP
+    [G] - Toggle Super Speed + Jump (with afterimages)
+    [H] - Toggle Fly
+    
+    Features:
+    - Time Stop (freezes everyone except you)
+    - ESP (see all players with health, distance, boxes)
+    - Super Speed & Jump (with afterimage trail)
+    - Fly with WASD controls
+    - All features work independently
+    - Full R15 and R6 support
+]]
+
+-- Services
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+-- Player
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local rootPart = char:WaitForChild("HumanoidRootPart")
+local camera = workspace.CurrentCamera
+
+-- Configuration
+local TIMESTOP_KEY = Enum.KeyCode.F
+local ESP_KEY = Enum.KeyCode.E
+local SUPER_KEY = Enum.KeyCode.X
+local FLY_KEY = Enum.KeyCode.V
+
+-- Super Mode Config
+local SPEED_MULTIPLIER = 3.5
+local JUMP_MULTIPLIER = 2
+
+local AFTERIMAGE_CONFIG = {
+    Enabled = true,
+    MaxAfterimages = 7,
+    MinAfterimages = 3,
+    CreateInterval = 0.1,
+    FadeTime = 0.8,
+    Transparency = 0.5,
+    Color = Color3.fromRGB(0, 170, 255)
+}
+
+-- ESP Config
+local ESP_CONFIG = {
+    BoxColor = Color3.fromRGB(255, 0, 0),
+    NameColor = Color3.fromRGB(255, 255, 255),
+    DistanceColor = Color3.fromRGB(200, 200, 200),
+    HealthBarColorGood = Color3.fromRGB(0, 255, 0),
+    HealthBarColorBad = Color3.fromRGB(255, 0, 0),
+    BoxThickness = 2,
+    MaxDistance = 2000,
+    ShowBox = true,
+    ShowName = true,
+    ShowDistance = true,
+    ShowHealth = true,
+    ShowHealthBar = true
+}
+
+-- State Variables
+local stoppedtime = false
+local frozenobjectstable = {}
+local espEnabled = false
+local espObjects = {}
+local superModeEnabled = false
+local originalWalkSpeed = 16
+local originalJumpPower = 50
+local activeClones = {}
+local lastAfterimageTime = 0
+local createAfterimageConnection = nil
+
+-- Fly State Variables
+local flyEnabled = false
+local flySpeed = 50
+local ctrl = {f = 0, b = 0, l = 0, r = 0}
+local lastctrl = {f = 0, b = 0, l = 0, r = 0}
+local flyBG = nil
+local flyBV = nil
+
+----------------------------------------------------------------------------------------------------
+-- GUI SETUP
+----------------------------------------------------------------------------------------------------
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "UltimateComboGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Time Stop Frame
+local TimeStopFrame = Instance.new("Frame")
+TimeStopFrame.Parent = ScreenGui
+TimeStopFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TimeStopFrame.BackgroundTransparency = 0.3
+TimeStopFrame.BorderSizePixel = 0
+TimeStopFrame.Position = UDim2.new(0, 10, 0, 10)
+TimeStopFrame.Size = UDim2.new(0, 200, 0, 60)
+
+local TSCorner = Instance.new("UICorner")
+TSCorner.CornerRadius = UDim.new(0, 10)
+TSCorner.Parent = TimeStopFrame
+
+local TSTitle = Instance.new("TextLabel")
+TSTitle.Parent = TimeStopFrame
+TSTitle.BackgroundTransparency = 1
+TSTitle.Position = UDim2.new(0, 10, 0, 5)
+TSTitle.Size = UDim2.new(1, -20, 0, 25)
+TSTitle.Font = Enum.Font.GothamBold
+TSTitle.Text = "⏱ FINAL HOUR REQUIEM"
+TSTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+TSTitle.TextSize = 14
+TSTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local TSStatus = Instance.new("TextLabel")
+TSStatus.Parent = TimeStopFrame
+TSStatus.BackgroundTransparency = 1
+TSStatus.Position = UDim2.new(0, 10, 0, 30)
+TSStatus.Size = UDim2.new(1, -20, 0, 20)
+TSStatus.Font = Enum.Font.GothamBold
+TSStatus.Text = "OFF [F]"
+TSStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+TSStatus.TextSize = 12
+TSStatus.TextXAlignment = Enum.TextXAlignment.Left
+
+-- ESP Frame
+local ESPFrame = Instance.new("Frame")
+ESPFrame.Parent = ScreenGui
+ESPFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ESPFrame.BackgroundTransparency = 0.3
+ESPFrame.BorderSizePixel = 0
+ESPFrame.Position = UDim2.new(0, 10, 0, 80)
+ESPFrame.Size = UDim2.new(0, 200, 0, 60)
+
+local ESPCorner = Instance.new("UICorner")
+ESPCorner.CornerRadius = UDim.new(0, 10)
+ESPCorner.Parent = ESPFrame
+
+local ESPTitle = Instance.new("TextLabel")
+ESPTitle.Parent = ESPFrame
+ESPTitle.BackgroundTransparency = 1
+ESPTitle.Position = UDim2.new(0, 10, 0, 5)
+ESPTitle.Size = UDim2.new(1, -20, 0, 25)
+ESPTitle.Font = Enum.Font.GothamBold
+ESPTitle.Text = "👁 METAVISION"
+ESPTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+ESPTitle.TextSize = 14
+ESPTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local ESPStatus = Instance.new("TextLabel")
+ESPStatus.Parent = ESPFrame
+ESPStatus.BackgroundTransparency = 1
+ESPStatus.Position = UDim2.new(0, 10, 0, 30)
+ESPStatus.Size = UDim2.new(1, -20, 0, 20)
+ESPStatus.Font = Enum.Font.GothamBold
+ESPStatus.Text = "OFF [E]"
+ESPStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+ESPStatus.TextSize = 12
+ESPStatus.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Super Mode Frame
+local SuperFrame = Instance.new("Frame")
+SuperFrame.Parent = ScreenGui
+SuperFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+SuperFrame.BackgroundTransparency = 0.3
+SuperFrame.BorderSizePixel = 0
+SuperFrame.Position = UDim2.new(0, 10, 0, 150)
+SuperFrame.Size = UDim2.new(0, 200, 0, 60)
+
+local SuperCorner = Instance.new("UICorner")
+SuperCorner.CornerRadius = UDim.new(0, 10)
+SuperCorner.Parent = SuperFrame
+
+local SuperTitle = Instance.new("TextLabel")
+SuperTitle.Parent = SuperFrame
+SuperTitle.BackgroundTransparency = 1
+SuperTitle.Position = UDim2.new(0, 10, 0, 5)
+SuperTitle.Size = UDim2.new(1, -20, 0, 25)
+SuperTitle.Font = Enum.Font.GothamBold
+SuperTitle.Text = "⚡ BIO-ENHANCEMENT"
+SuperTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+SuperTitle.TextSize = 14
+SuperTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local SuperStatus = Instance.new("TextLabel")
+SuperStatus.Parent = SuperFrame
+SuperStatus.BackgroundTransparency = 1
+SuperStatus.Position = UDim2.new(0, 10, 0, 30)
+SuperStatus.Size = UDim2.new(1, -20, 0, 20)
+SuperStatus.Font = Enum.Font.GothamBold
+SuperStatus.Text = "OFF [X]"
+SuperStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+SuperStatus.TextSize = 12
+SuperStatus.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Fly Frame
+local FlyFrame = Instance.new("Frame")
+FlyFrame.Parent = ScreenGui
+FlyFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+FlyFrame.BackgroundTransparency = 0.3
+FlyFrame.BorderSizePixel = 0
+FlyFrame.Position = UDim2.new(0, 10, 0, 220)
+FlyFrame.Size = UDim2.new(0, 200, 0, 60)
+
+local FlyCorner = Instance.new("UICorner")
+FlyCorner.CornerRadius = UDim.new(0, 10)
+FlyCorner.Parent = FlyFrame
+
+local FlyTitle = Instance.new("TextLabel")
+FlyTitle.Parent = FlyFrame
+FlyTitle.BackgroundTransparency = 1
+FlyTitle.Position = UDim2.new(0, 10, 0, 5)
+FlyTitle.Size = UDim2.new(1, -20, 0, 25)
+FlyTitle.Font = Enum.Font.GothamBold
+FlyTitle.Text = "✈ HYPERFLIGHT"
+FlyTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyTitle.TextSize = 14
+FlyTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local FlyStatus = Instance.new("TextLabel")
+FlyStatus.Parent = FlyFrame
+FlyStatus.BackgroundTransparency = 1
+FlyStatus.Position = UDim2.new(0, 10, 0, 30)
+FlyStatus.Size = UDim2.new(1, -20, 0, 20)
+FlyStatus.Font = Enum.Font.GothamBold
+FlyStatus.Text = "OFF [V]"
+FlyStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+FlyStatus.TextSize = 12
+FlyStatus.TextXAlignment = Enum.TextXAlignment.Left
+
+----------------------------------------------------------------------------------------------------
+-- TIME STOP FUNCTIONS
+----------------------------------------------------------------------------------------------------
+
+function timestop()
+	if stoppedtime == true then return end
+	
+	TSStatus.Text = "ENABLED [F]"
+	TSStatus.TextColor3 = Color3.fromRGB(80, 255, 80)
+	
+	settings().Network.IncomingReplicationLag = math.huge
+	
+	for _, v in pairs(workspace:GetDescendants()) do
+		if v:IsA("BasePart") then
+			if not v.Anchored then
+				if not v:IsDescendantOf(char) then
+					v.Anchored = true
+					table.insert(frozenobjectstable, v)
+				end
+			end
+		end
+	end
+	
+	for _, v in pairs(workspace:GetDescendants()) do
+		if v:IsA("ParticleEmitter") or v:IsA("Fire") then
+			v.TimeScale = 0
+		end
+	end
+	
+	for _, v in pairs(workspace:GetDescendants()) do
+		if v:IsA("Sound") then
+			if not v:IsDescendantOf(char) then
+				v.PlaybackSpeed = 0
+			end
+		end
+	end
+	
+	stoppedtime = true
+	print("[TIME STOP] Enabled")
+end
+
+function timeresume()
+	if stoppedtime == false then return end
+	
+	TSStatus.Text = "OFF [F]"
+	TSStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+	
+	settings().Network.IncomingReplicationLag = 0
+	
+	for _, v in pairs(frozenobjectstable) do
+		if v and v:IsA("BasePart") then
+			v.Anchored = false
+		end
+	end
+	
+	for _, v in pairs(workspace:GetDescendants()) do
+		if v:IsA("ParticleEmitter") or v:IsA("Fire") then
+			v.TimeScale = 1
+		end
+	end
+	
+	for _, v in pairs(workspace:GetDescendants()) do
+		if v:IsA("Sound") then
+			if not v:IsDescendantOf(char) then
+				v.PlaybackSpeed = 1
+			end
+		end
+	end
+	
+	stoppedtime = false
+	frozenobjectstable = {}
+	print("[TIME STOP] Disabled")
+end
+
+local function toggleTimeStop()
+	if stoppedtime == false then
+		timestop()
+	else
+		timeresume()
+	end
+end
+
+----------------------------------------------------------------------------------------------------
+-- ESP FUNCTIONS
+----------------------------------------------------------------------------------------------------
+
+local function createESP(plr)
+	if plr == player then return end
+	
+	local espTable = {
+		player = plr,
+		drawings = {}
+	}
+	
+	if ESP_CONFIG.ShowBox then
+		local box = Drawing.new("Square")
+		box.Visible = false
+		box.Color = ESP_CONFIG.BoxColor
+		box.Thickness = ESP_CONFIG.BoxThickness
+		box.Transparency = 1
+		box.Filled = false
+		espTable.drawings.box = box
+	end
+	
+	if ESP_CONFIG.ShowName then
+		local name = Drawing.new("Text")
+		name.Visible = false
+		name.Color = ESP_CONFIG.NameColor
+		name.Center = true
+		name.Outline = true
+		name.Size = 16
+		name.Font = 2
+		name.Text = plr.Name
+		espTable.drawings.name = name
+	end
+	
+	if ESP_CONFIG.ShowDistance then
+		local distance = Drawing.new("Text")
+		distance.Visible = false
+		distance.Color = ESP_CONFIG.DistanceColor
+		distance.Center = true
+		distance.Outline = true
+		distance.Size = 14
+		distance.Font = 2
+		espTable.drawings.distance = distance
+	end
+	
+	if ESP_CONFIG.ShowHealthBar then
+		local healthBarBG = Drawing.new("Square")
+		healthBarBG.Visible = false
+		healthBarBG.Color = Color3.fromRGB(0, 0, 0)
+		healthBarBG.Thickness = 1
+		healthBarBG.Transparency = 0.5
+		healthBarBG.Filled = true
+		espTable.drawings.healthBarBG = healthBarBG
+		
+		local healthBar = Drawing.new("Square")
+		healthBar.Visible = false
+		healthBar.Thickness = 1
+		healthBar.Transparency = 1
+		healthBar.Filled = true
+		espTable.drawings.healthBar = healthBar
+	end
+	
+	if ESP_CONFIG.ShowHealth then
+		local health = Drawing.new("Text")
+		health.Visible = false
+		health.Color = Color3.fromRGB(255, 255, 255)
+		health.Center = true
+		health.Outline = true
+		health.Size = 14
+		health.Font = 2
+		espTable.drawings.health = health
+	end
+	
+	espObjects[plr] = espTable
+end
+
+local function removeESP(plr)
+	local espTable = espObjects[plr]
+	if espTable then
+		for _, drawing in pairs(espTable.drawings) do
+			drawing:Remove()
+		end
+		espObjects[plr] = nil
+	end
+end
+
+local function updateESP()
+	for plr, espTable in pairs(espObjects) do
+		if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Humanoid") then
+			local character = plr.Character
+			local rootPart = character.HumanoidRootPart
+			local humanoid = character.Humanoid
+			
+			local distance = (rootPart.Position - camera.CFrame.Position).Magnitude
+			
+			if distance <= ESP_CONFIG.MaxDistance then
+				local vector, onScreen = camera:WorldToViewportPoint(rootPart.Position)
+				
+				if onScreen then
+					local scaleFactor = 1 / (distance / 100)
+					local size = Vector2.new(2000 / distance, 2500 / distance)
+					
+					if espTable.drawings.box then
+						espTable.drawings.box.Size = size
+						espTable.drawings.box.Position = Vector2.new(vector.X - size.X / 2, vector.Y - size.Y / 2)
+						espTable.drawings.box.Visible = true
+					end
+					
+					if espTable.drawings.name then
+						espTable.drawings.name.Position = Vector2.new(vector.X, vector.Y - size.Y / 2 - 20)
+						espTable.drawings.name.Visible = true
+					end
+					
+					if espTable.drawings.distance then
+						espTable.drawings.distance.Text = string.format("[%.0f studs]", distance)
+						espTable.drawings.distance.Position = Vector2.new(vector.X, vector.Y + size.Y / 2 + 5)
+						espTable.drawings.distance.Visible = true
+					end
+					
+					if espTable.drawings.healthBar and espTable.drawings.healthBarBG then
+						local healthPercent = humanoid.Health / humanoid.MaxHealth
+						local barWidth = 4
+						local barHeight = size.Y
+						
+						local barX = vector.X - size.X / 2 - barWidth - 5
+						local barY = vector.Y - size.Y / 2
+						
+						espTable.drawings.healthBarBG.Size = Vector2.new(barWidth, barHeight)
+						espTable.drawings.healthBarBG.Position = Vector2.new(barX, barY)
+						espTable.drawings.healthBarBG.Visible = true
+						
+						espTable.drawings.healthBar.Size = Vector2.new(barWidth, barHeight * healthPercent)
+						espTable.drawings.healthBar.Position = Vector2.new(barX, barY + barHeight * (1 - healthPercent))
+						espTable.drawings.healthBar.Color = ESP_CONFIG.HealthBarColorGood:Lerp(ESP_CONFIG.HealthBarColorBad, 1 - healthPercent)
+						espTable.drawings.healthBar.Visible = true
+					end
+					
+					if espTable.drawings.health then
+						espTable.drawings.health.Text = string.format("HP: %.0f/%.0f", humanoid.Health, humanoid.MaxHealth)
+						espTable.drawings.health.Position = Vector2.new(vector.X, vector.Y + size.Y / 2 + 20)
+						espTable.drawings.health.Visible = true
+					end
+				else
+					for _, drawing in pairs(espTable.drawings) do
+						drawing.Visible = false
+					end
+				end
+			else
+				for _, drawing in pairs(espTable.drawings) do
+					drawing.Visible = false
+				end
+			end
+		else
+			for _, drawing in pairs(espTable.drawings) do
+				drawing.Visible = false
+			end
+		end
+	end
+end
+
+local function enableESP()
+	espEnabled = true
+	ESPStatus.Text = "ENABLED [E]"
+	ESPStatus.TextColor3 = Color3.fromRGB(80, 255, 80)
+	
+	for _, plr in pairs(Players:GetPlayers()) do
+		createESP(plr)
+	end
+	
+	print("[ESP] Enabled")
+end
+
+local function disableESP()
+	espEnabled = false
+	ESPStatus.Text = "OFF [E]"
+	ESPStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+	
+	for plr, _ in pairs(espObjects) do
+		removeESP(plr)
+	end
+	
+	print("[ESP] Disabled")
+end
+
+local function toggleESP()
+	if espEnabled then
+		disableESP()
+	else
+		enableESP()
+	end
+end
+
+----------------------------------------------------------------------------------------------------
+-- AFTERIMAGE FUNCTIONS (R15/R6 COMPATIBLE)
+----------------------------------------------------------------------------------------------------
+
+local function createAfterimage()
+    if not superModeEnabled or not AFTERIMAGE_CONFIG.Enabled then return end
+    if not char or not char.Parent then return end
+    if not char:FindFirstChild("HumanoidRootPart") then return end
+    
+    if #afterimages >= AFTERIMAGE_CONFIG.MaxAfterimages then
+        local oldest = table.remove(afterimages, 1)
+        if oldest and oldest.Parent then
+            oldest:Destroy()
+        end
+    end
+    
+    -- Make character archivable (from Sandevistan)
+    char.Archivable = true
+    
+    -- Clone entire character (from Sandevistan)
+    local clone = char:Clone()
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then 
+        char.Archivable = false
+        return 
+    end
+    
+    clone.Name = "Afterimage"
+    clone.Parent = workspace
+    
+    -- Set position using SetPrimaryPartCFrame (from Sandevistan)
+    clone:SetPrimaryPartCFrame(root.CFrame)
+    
+    -- Remove humanoid (from Sandevistan)
+    local humanoidClone = clone:FindFirstChildOfClass("Humanoid")
+    if humanoidClone then 
+        humanoidClone:Destroy() 
+    end
+    
+    -- Set properties for all descendants (from Sandevistan)
+    for _, obj in ipairs(clone:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.Anchored = true
+            obj.CanCollide = false
+            obj.Transparency = AFTERIMAGE_CONFIG.Transparency
+            obj.Color = AFTERIMAGE_CONFIG.Color
+            obj.Material = Enum.Material.Neon
+            obj.CastShadow = false
+        elseif obj:IsA("Decal") then
+            obj.Transparency = AFTERIMAGE_CONFIG.Transparency
+        elseif obj:IsA("SpecialMesh") then
+            obj.TextureId = ""
+        end
+    end
+    
+    -- Reset archivable
+    char.Archivable = false
+    
+    table.insert(activeClones, { clone = clone })
+    
+    -- Fade out (similar to Sandevistan)
+    for _, part in ipairs(clone:GetDescendants()) do
+        if part:IsA("BasePart") or part:IsA("Decal") then
+            TweenService:Create(part, TweenInfo.new(AFTERIMAGE_CONFIG.FadeTime), { 
+                Transparency = 1 
+            }):Play()
+        end
+    end
+    
+    -- Destroy after fade
+    task.delay(AFTERIMAGE_CONFIG.FadeTime, function()
+        if clone and clone.Parent then 
+            clone:Destroy()
+        end
+        -- Remove from table
+        for i, data in ipairs(activeClones) do
+            if data.clone == clone then
+                table.remove(activeClones, i)
+                break
+            end
+        end
+    end)
+end
+
+----------------------------------------------------------------------------------------------------
+-- SUPER MODE FUNCTIONS (R15/R6 COMPATIBLE)
+----------------------------------------------------------------------------------------------------
+
+local function enableSuperMode()
+    if superModeEnabled then return end
+    superModeEnabled = true
+    
+    SuperStatus.Text = "ENABLED [X]"
+    SuperStatus.TextColor3 = Color3.fromRGB(80, 255, 80)
+    
+    originalWalkSpeed = humanoid.WalkSpeed
+    
+    -- R15 uses JumpHeight (formerly JumpPower in R6)
+    if humanoid.UseJumpPower then
+        -- R6 or legacy R15 with JumpPower
+        originalJumpPower = humanoid.JumpPower
+        humanoid.JumpPower = originalJumpPower * JUMP_MULTIPLIER
+    else
+        -- Modern R15 with JumpHeight
+        originalJumpPower = humanoid.JumpHeight
+        humanoid.JumpHeight = originalJumpPower * JUMP_MULTIPLIER
+    end
+    
+    humanoid.WalkSpeed = originalWalkSpeed * SPEED_MULTIPLIER
+    
+    createAfterimageConnection = RunService.Heartbeat:Connect(function()
+        if not superModeEnabled then return end
+        
+        local currentTime = tick()
+        if currentTime - lastAfterimageTime >= AFTERIMAGE_CONFIG.CreateInterval then
+            if humanoid.MoveVector.Magnitude > 0 or humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+                createAfterimage()
+                lastAfterimageTime = currentTime
+            end
+        end
+    end)
+    
+    print("[SUPER MODE] Enabled - Speed x" .. SPEED_MULTIPLIER .. ", Jump x" .. JUMP_MULTIPLIER)
+end
+
+local function disableSuperMode()
+    if not superModeEnabled then return end
+    superModeEnabled = false
+    
+    SuperStatus.Text = "OFF [X]"
+    SuperStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+    
+    humanoid.WalkSpeed = originalWalkSpeed
+    
+    -- Restore jump based on R6/R15
+    if humanoid.UseJumpPower then
+        humanoid.JumpPower = originalJumpPower
+    else
+        humanoid.JumpHeight = originalJumpPower
+    end
+    
+    if createAfterimageConnection then
+        createAfterimageConnection:Disconnect()
+        createAfterimageConnection = nil
+    end
+    
+    for _, data in pairs(activeClones) do
+        if data.clone and data.clone.Parent then
+            data.clone:Destroy()
+        end
+    end
+    activeClones = {}
+    
+    print("[SUPER MODE] Disabled")
+end
+
+local function toggleSuperMode()
+    if superModeEnabled then
+        disableSuperMode()
+    else
+        enableSuperMode()
+    end
+end
+
+----------------------------------------------------------------------------------------------------
+-- FLY FUNCTIONS
+----------------------------------------------------------------------------------------------------
+
+local function enableFly()
+    if flyEnabled then return end
+    flyEnabled = true
+    
+    FlyStatus.Text = "ENABLED [V]"
+    FlyStatus.TextColor3 = Color3.fromRGB(80, 255, 80)
+    
+    local speed = 0
+    
+    -- Create BodyGyro
+    flyBG = Instance.new("BodyGyro")
+    flyBG.P = 9e4
+    flyBG.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+    flyBG.cframe = rootPart.CFrame
+    flyBG.Parent = rootPart
+    
+    -- Create BodyVelocity
+    flyBV = Instance.new("BodyVelocity")
+    flyBV.velocity = Vector3.new(0, 0.1, 0)
+    flyBV.maxForce = Vector3.new(9e9, 9e9, 9e9)
+    flyBV.Parent = rootPart
+    
+    -- Main fly loop
+    RunService.Heartbeat:Connect(function()
+        if not flyEnabled then return end
+        
+        humanoid.PlatformStand = true
+        
+        if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
+            speed = speed + flySpeed * 0.10
+            if speed > flySpeed then
+                speed = flySpeed
+            end
+        elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and speed ~= 0 then
+            speed = speed - flySpeed * 0.10
+            if speed < 0 then
+                speed = 0
+            end
+        end
+        
+        if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
+            flyBV.velocity = ((camera.CoordinateFrame.lookVector * (ctrl.f + ctrl.b)) + 
+                ((camera.CoordinateFrame * CFrame.new(ctrl.l + ctrl.r, (ctrl.f + ctrl.b) * 0.2, 0).p) - 
+                camera.CoordinateFrame.p)) * speed
+            lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
+        elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and speed ~= 0 then
+            flyBV.velocity = ((camera.CoordinateFrame.lookVector * (lastctrl.f + lastctrl.b)) + 
+                ((camera.CoordinateFrame * CFrame.new(lastctrl.l + lastctrl.r, (lastctrl.f + lastctrl.b) * 0.2, 0).p) - 
+                camera.CoordinateFrame.p)) * speed
+        else
+            flyBV.velocity = Vector3.new(0, 0.1, 0)
+        end
+        
+        flyBG.cframe = camera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f + ctrl.b) * 50 * speed / flySpeed), 0, 0)
+    end)
+    
+    print("[FLY] Enabled - Use WASD to fly")
+end
+
+local function disableFly()
+    if not flyEnabled then return end
+    flyEnabled = false
+    
+    FlyStatus.Text = "OFF [V]"
+    FlyStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+    
+    ctrl = {f = 0, b = 0, l = 0, r = 0}
+    lastctrl = {f = 0, b = 0, l = 0, r = 0}
+    
+    if flyBG then
+        flyBG:Destroy()
+        flyBG = nil
+    end
+    
+    if flyBV then
+        flyBV:Destroy()
+        flyBV = nil
+    end
+    
+    humanoid.PlatformStand = false
+    
+    print("[FLY] Disabled")
+end
+
+local function toggleFly()
+    if flyEnabled then
+        disableFly()
+    else
+        enableFly()
+    end
+end
+
+----------------------------------------------------------------------------------------------------
+-- CONNECTIONS
+----------------------------------------------------------------------------------------------------
+
+-- Handle new players (ESP)
+Players.PlayerAdded:Connect(function(plr)
+	if espEnabled then
+		plr.CharacterAdded:Connect(function()
+			task.wait(0.5)
+			createESP(plr)
+		end)
+	end
+end)
+
+Players.PlayerRemoving:Connect(function(plr)
+	removeESP(plr)
+end)
+
+-- Update ESP every frame
+RunService.RenderStepped:Connect(function()
+	if espEnabled then
+		updateESP()
+	end
+end)
+
+-- Keybind Handler
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	
+	if input.KeyCode == TIMESTOP_KEY then
+		toggleTimeStop()
+	elseif input.KeyCode == ESP_KEY then
+		toggleESP()
+	elseif input.KeyCode == SUPER_KEY then
+		toggleSuperMode()
+	elseif input.KeyCode == FLY_KEY then
+		toggleFly()
+	-- WASD controls for fly
+	elseif input.KeyCode == Enum.KeyCode.W then
+		ctrl.f = 1
+	elseif input.KeyCode == Enum.KeyCode.S then
+		ctrl.b = -1
+	elseif input.KeyCode == Enum.KeyCode.A then
+		ctrl.l = -1
+	elseif input.KeyCode == Enum.KeyCode.D then
+		ctrl.r = 1
+	end
+end)
+
+-- Handle key release for fly controls
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+	if input.KeyCode == Enum.KeyCode.W then
+		ctrl.f = 0
+	elseif input.KeyCode == Enum.KeyCode.S then
+		ctrl.b = 0
+	elseif input.KeyCode == Enum.KeyCode.A then
+		ctrl.l = 0
+	elseif input.KeyCode == Enum.KeyCode.D then
+		ctrl.r = 0
+	end
+end)
+
+-- Handle character respawn
+player.CharacterAdded:Connect(function(newChar)
+	char = newChar
+	humanoid = newChar:WaitForChild("Humanoid")
+	rootPart = newChar:WaitForChild("HumanoidRootPart")
+	
+	if stoppedtime then
+		timeresume()
+	end
+	
+	if superModeEnabled then
+		disableSuperMode()
+	end
+	
+	if flyEnabled then
+		disableFly()
+	end
+	
+	originalWalkSpeed = humanoid.WalkSpeed
+	if humanoid.UseJumpPower then
+		originalJumpPower = humanoid.JumpPower
+	else
+		originalJumpPower = humanoid.JumpHeight
+	end
+end)
+
+-- Handle death
+humanoid.Died:Connect(function()
+	if stoppedtime then
+		timeresume()
+	end
+	if superModeEnabled then
+		disableSuperMode()
+	end
+	if flyEnabled then
+		disableFly()
+	end
+end)
+
+-- Detect R6 vs R15
+local rigType = humanoid.RigType == Enum.HumanoidRigType.R6 and "R6" or "R15"
+print("╔═══════════════════════════════════╗")
+print("║   LOADED, PLEASE WAIT FOR IT.     ║")
+print("╚═══════════════════════════════════╝")
+print("► Rig Type: " .. rigType)
+print("► [F] - Time Stop")
+print("► [E] - ESP")
+print("► [G] - Super Speed + Jump")
+print("► [H] - Fly (WASD to move)")
+print("═══════════════════════════════════")
